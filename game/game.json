@@ -1,0 +1,83 @@
+{
+    "intro" : [
+        "Above you sits the earth...",
+        "\"Will I ever make it back?\""
+    ],
+    "defaults" : {
+				"entry_room" : "mess_hall",
+        "no_exit" : "There's nothing there"
+    },
+    "rooms" : {
+        "mess_hall" : {
+            "title" : "Mess Hall",
+            "description" : "You are in a mess hall, it's pretty dirty in here. Have you thought of cleaning up?",
+            "exits" : {
+                "north" : {
+                    "description" : "There is a sink full of dishes to wash. If you were back home, the flies would be starting to come out."
+                },
+                "east" : {
+                    "roomId" : "living_quarters",
+                    "description" : "Beyond that door is the living quarters"
+                }
+            }
+        },
+        "living_quarters" : {
+            "title" : "Living Quarters",
+            "description" : "This is where the crew used to be... You can see Richard's jacket still draped over the couch.",
+            "exits" : {
+                "west" : {
+                    "description" : "Beyond that door is the mess hall",
+                    "roomId" : "mess_hall"
+                },
+                "south" : {
+                    "description" : "Julie's room... do you really want to go there?",
+                    "roomId" : "julie_room"
+                },
+                "north" : {
+                    "description" : "The way is shut. It was made by those who are dead, and the Dead keep it. The way is shut."
+                },
+                "east" : {
+                    "description" : "Richards room.",
+                    "roomId" : "richard_room",
+                    "lock" : "richard_jacket",
+                    "success" : "You unlock richards door, it swings open and you can smell something foul...",
+                    "fail" : "The door is locked."
+                }
+            },
+            "items" : {
+                "richard_jacket" : {
+                    "lookTerms" : ["jacket", "richard", "richards"],
+                    "pickupTerms" : ["search"]
+                }
+            }
+        },
+        "julie_room" : {
+            "title" : "Julie's Room",
+            "description" : "This room stil smells like death...",
+            "exits" : {
+                "north" : {
+                    "description" : "Living Quarters",
+                    "roomId" : "living_quarters"
+                }
+            }
+        },
+        "richard_room" : {
+            "title" : "Richard's Room",
+            "description" : "A chicken sits in the middle of the room, still alive somehow.",
+            "exits" : {
+                "west" : {
+                    "description" : "Living quarters",
+                    "roomId" : "living_quarters"
+                }
+            }
+        }
+
+    },
+    "items" : {
+        "richard_jacket" : {
+            "description" : "A musty old jacket",
+            "found" : "inside you find a key"
+        }
+    }
+
+}
