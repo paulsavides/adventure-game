@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Pisces.GameEngine.GameContext.Constants
+﻿namespace Pisces.GameEngine.GameContext.Constants
 {
   internal static class StateKeys
   {

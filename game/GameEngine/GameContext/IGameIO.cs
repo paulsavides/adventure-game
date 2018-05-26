@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Pisces.GameEngine.GameContext
+﻿namespace Pisces.GameEngine.GameContext
 {
+  // ReSharper disable once InconsistentNaming
   public interface IGameIO
   {
     void Prompt();

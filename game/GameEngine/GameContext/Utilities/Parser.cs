@@ -7,8 +7,8 @@ namespace Pisces.GameEngine.GameContext.Utilities
   {
     internal static List<string> Tokenize(string str)
     {
-      List<int> toRemove = new List<int>();
-      for (int i = 0; i < str.Length; i++)
+      var toRemove = new List<int>();
+      for (var i = 0; i < str.Length; i++)
       {
         if (ShouldRemove(str[i]))
         {
@@ -16,11 +16,10 @@ namespace Pisces.GameEngine.GameContext.Utilities
         }
       }
 
-      for (int j = toRemove.Count - 1; j >= 0; j--)
+      for (var j = toRemove.Count - 1; j >= 0; j--)
       {
         str.Remove(j);
       }
-
 
       str = str.ToLower();
       return str.Split(' ').ToList();

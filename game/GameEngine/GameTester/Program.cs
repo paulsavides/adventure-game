@@ -10,7 +10,7 @@ namespace Pisces.GameEngine.GameTester
 {
   class Program
   {
-    static string FilePath = @"D:\Workspace\Web\paulsavides.com\adventure\game\game.json";
+    static string FilePath = @"..\..\game.json";
     static int Main(string[] args)
     {
       DoGameStuff();

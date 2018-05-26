@@ -6,8 +6,8 @@ using Pisces.GameEngine.GameContext.IO;
 using Pisces.GameEngine.GameContext.Constants;
 using System.Collections.Generic;
 using Pisces.GameEngine.GameContext.Utilities;
-using System.Threading;
 
+// ReSharper disable InconsistentNaming
 namespace Pisces.GameEngine.GameContext
 {
   internal class Context : IGameContext
@@ -17,11 +17,9 @@ namespace Pisces.GameEngine.GameContext
 
     private IGameIO _gameIO;
 
-    private string _error;
-    private bool _isError;
-
     private List<string> _tokens;
 
+    private Dictionary<string, Action> _actionMap;
 
     internal Context(string gameFilePath)
     {
@@ -44,13 +42,21 @@ namespace Pisces.GameEngine.GameContext
           };
         }
 
+        _actionMap = new Dictionary<string, Action>
+        {
+          {ReservedWords.Go, ProcessGo},
+          {ReservedWords.Look, ProcessLook},
+          {ReservedWords.Search, ProcessSearch},
+          {ReservedWords.Help, ProcessHelp}
+        };
+
         if (gameIO == null)
         {
           _gameIO = new ConsoleGameIO();
         }
 
       }
-      catch (Exception e)
+      catch (Exception)
       {
         //TODO: LOG
       }
@@ -76,7 +82,6 @@ namespace Pisces.GameEngine.GameContext
       while (ReadNext())
       {
         ProcessTokens();
-        //DescribeCurrentState();
         _gameIO.Prompt();
       }
     }
@@ -91,22 +96,13 @@ namespace Pisces.GameEngine.GameContext
 
       foreach (var token in _tokens)
       {
-        switch (token)
-        {
-          case ReservedWords.Look:
-            ProcessLook();
-            return;
-          case ReservedWords.Go:
-            ProcessGo();
-            return;
-          case ReservedWords.Search:
-            ProcessSearch();
-            return;
-          default:
-            break;
-        }
+        if (!_actionMap.ContainsKey(token)) continue;
+
+        _actionMap[token]();
+        return;
       }
 
+      // default if we don't know what to do
       DescribeCurrentState();
     }
 
@@ -141,101 +137,6 @@ namespace Pisces.GameEngine.GameContext
 
       DescribeCurrentState();
     }
-
-    private bool InInventory(string itemId)
-    {
-      if (_gameState.Inventory == null)
-      {
-        _gameState.Inventory = new HashSet<string>();
-      }
-
-      return _gameState.Inventory.Contains(itemId);
-    }
-
-    private void AddToInventory(string itemId)
-    {
-      if (_gameState.Inventory == null)
-      {
-        _gameState.Inventory = new HashSet<string>();
-      }
-
-      if (!InInventory(itemId))
-      {
-        _gameState.Inventory.Add(itemId);
-      }
-    }
-
-    private void ProcessGo()
-    {
-      var room = CurrentRoom();
-
-      if (room.Exits != null)
-      {
-        foreach (var exit in room.Exits)
-        {
-          if (_tokens.Contains(exit.Key))
-          {
-            if (CanExit(room, exit.Value))
-            {
-              if (exit.Value.Lock != null && !HasExited(_gameState.CurrentRoom, exit.Key))
-              {
-                UnlockExit(_gameState.CurrentRoom, exit.Key, exit.Value);
-              }
-
-              _gameState.CurrentRoom = exit.Value.RoomId;
-              _gameIO.Write(CurrentRoom().Description);
-            }
-            else
-            {
-              _gameIO.Write(exit.Value.Fail);
-            }
-          }
-        }
-      }
-    }
-
-    private void UnlockExit(string roomId, string exitName, Exit exit)
-    {
-      if (!_gameState.UnlockedExits.ContainsKey(roomId))
-      {
-        _gameState.UnlockedExits.Add(roomId, new Dictionary<string, bool>());
-      }
-
-      _gameState.UnlockedExits[roomId].Add(exitName, true);
-      _gameIO.Write(exit.Success);
-      _gameIO.Write("");
-    }
-
-    private bool HasExited(string roomId, string exitName)
-    {
-      if (!_gameState.UnlockedExits.ContainsKey(roomId))
-      {
-        return false;
-      }
-
-      if (_gameState.UnlockedExits[roomId].ContainsKey(exitName))
-      {
-        return true;
-      }
-
-      return false;
-    }
-
-    private bool CanExit(Room room, Exit exit)
-    {
-      if (string.IsNullOrEmpty(exit.Lock))
-      {
-        return true;
-      }
-
-      if (_gameState.Inventory.Contains(exit.Lock))
-      {
-        return true;
-      }
-
-      return false;
-    }
-
 
     private void ProcessLook()
     {
@@ -272,6 +173,87 @@ namespace Pisces.GameEngine.GameContext
 
       _gameIO.Write(room.Description);
 
+    }
+
+    private void ProcessGo()
+    {
+      var room = CurrentRoom();
+
+      if (room.Exits == null)
+      {
+        return;
+      }
+              
+      foreach (var exit in room.Exits)
+      {
+        if (!_tokens.Contains(exit.Key)) continue;
+
+        if (CanExit(exit.Value))
+        {
+          if (exit.Value.Lock != null && !HasExited(_gameState.CurrentRoom, exit.Key))
+          {
+            UnlockExit(_gameState.CurrentRoom, exit.Key, exit.Value);
+          }
+
+          _gameState.CurrentRoom = exit.Value.RoomId;
+          _gameIO.Write(CurrentRoom().Description);
+        }
+        else
+        {
+          _gameIO.Write(exit.Value.Fail);
+        }
+      }
+      
+    }
+
+    private void ProcessHelp()
+    {
+
+    }
+
+    private bool InInventory(string itemId)
+    {
+      if (_gameState.Inventory == null)
+      {
+        _gameState.Inventory = new HashSet<string>();
+      }
+
+      return _gameState.Inventory.Contains(itemId);
+    }
+
+    private void AddToInventory(string itemId)
+    {
+      if (_gameState.Inventory == null)
+      {
+        _gameState.Inventory = new HashSet<string>();
+      }
+
+      if (!InInventory(itemId))
+      {
+        _gameState.Inventory.Add(itemId);
+      }
+    }
+
+    private void UnlockExit(string roomId, string exitName, Exit exit)
+    {
+      if (!_gameState.UnlockedExits.ContainsKey(roomId))
+      {
+        _gameState.UnlockedExits.Add(roomId, new Dictionary<string, bool>());
+      }
+
+      _gameState.UnlockedExits[roomId].Add(exitName, true);
+      _gameIO.Write(exit.Success);
+      _gameIO.Write("");
+    }
+
+    private bool HasExited(string roomId, string exitName)
+    {
+      return _gameState.UnlockedExits.ContainsKey(roomId) && _gameState.UnlockedExits[roomId].ContainsKey(exitName);
+    }
+
+    private bool CanExit(Exit exit)
+    {
+      return string.IsNullOrEmpty(exit.Lock) || _gameState.Inventory.Contains(exit.Lock);
     }
 
     private Room CurrentRoom()

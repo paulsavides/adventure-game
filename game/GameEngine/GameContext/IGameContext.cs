@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Pisces.GameEngine.GameContext
+﻿namespace Pisces.GameEngine.GameContext
 {
   public interface IGameContext
   {

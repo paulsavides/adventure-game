@@ -3,10 +3,11 @@ using System.Threading;
 
 namespace Pisces.GameEngine.GameContext.IO
 {
+  // ReSharper disable once InconsistentNaming
   internal class ConsoleGameIO : IGameIO
   {
-    private long last;
-    private long timeout = 200;
+    private long _last;
+    private const long Timeout = 200;
 
     public void Prompt()
     {
@@ -28,17 +29,17 @@ namespace Pisces.GameEngine.GameContext.IO
     {
       Wait();
       Console.WriteLine(str);
-      last = DateTime.Now.Ticks;
+      _last = DateTime.Now.Ticks;
     }
 
     public void Wait()
     {
       long now = DateTime.Now.Ticks;
-      long elapsed = now - last;
+      long elapsed = now - _last;
 
-      if (elapsed < timeout)
+      if (elapsed < Timeout)
       {
-        Thread.Sleep((int)(timeout - elapsed));
+        Thread.Sleep((int)(Timeout - elapsed));
       }
     }
   }

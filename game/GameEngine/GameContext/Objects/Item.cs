@@ -4,10 +4,10 @@ namespace Pisces.GameEngine.GameContext.Objects
 {
   internal class Item
   {
-    [JsonProperty()]
+    [JsonProperty]
     internal string Description { get; set; }
 
-    [JsonProperty()]
+    [JsonProperty]
     internal string Found { get; set; }
   }
 }
